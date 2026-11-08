@@ -19,20 +19,30 @@ Endpoints: to be filled in.
 
 ## Feature structure
 
-To be filled in.
+To be filled in as features are built.
 
 ## Trade-offs
 
-- Project format: classic Property List (`project.pbxproj`) instead of the new
-  JSON format (`.xcproj`). Reason: it opens in older Xcode versions too.
+- Project format: classic Property List (`project.pbxproj`). The Xcode 27.2
+  template created the new JSON format (`.xcproj`), which needs Xcode 27 or
+  later. Property List is the widely supported format. Compatibility is set to
+  Xcode 27.0.
 - Swift 6 language mode with Default Actor Isolation set to `nonisolated`.
-  Reason: models and the API client stay free of implicit MainActor isolation.
+  Reason: models and dependencies stay free of implicit MainActor isolation.
 - iPhone only, deployment target iOS 17. Reason: small scope.
-- TCA 1.26.2, added with Swift Package Manager. No other third-party dependencies.
+- TCA 1.26.2 via Swift Package Manager. It is the only direct dependency. TCA
+  brings its own Point-Free packages and swift-syntax. `Package.resolved` is
+  committed, so the versions are pinned.
+- `Album` and `AlbumDetail` serve as API models and domain models. Reason: fewer
+  types for a small app.
 
 ## With more time
 
-To be filled in.
+- Mocks live in the app target. I would wrap them in `#if DEBUG` or move them
+  to a separate module.
+- Separate DTOs for the API, mapped to domain models.
+- Split the app into Swift packages (for example `Models`, `DeezerClient`,
+  `Features`) so the compiler enforces the boundaries.
 
 ## AI tools
 
