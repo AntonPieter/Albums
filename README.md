@@ -14,9 +14,10 @@ It shows popular albums from the Deezer API.
 ## API
 
 Deezer public API (no key).
-Why: no key, large cover art, and music fits my background.
-Endpoints:
 
+Why: no key, large cover art, and music fits my background.
+
+Endpoints:
 - `GET /chart/0/albums?limit=50` (list, the chart returns at most 50 albums)
 - `GET /search/album?q=&index=` (search, 25 albums per page, `index` is the offset)
 - `GET /album/{id}` (detail with tracks, genres, label and release date)
@@ -26,6 +27,7 @@ Endpoints:
 ```
 Albums/
   App/                   AppFeature (parent, owns the StackState) and AppView
+  Clients/               DeezerClient (live, preview and test values)
   Features/AlbumList/    list feature and view
   Features/AlbumDetail/  detail feature and view
   Models/                Album, AlbumDetail, Page, mock data
@@ -40,7 +42,7 @@ State flow:
 
 The list feature does not know about the detail feature. Only the parent connects them.
 
-## Trade-offs
+## Decisions and trade-offs
 
 - Project format: classic Property List (`project.pbxproj`). The Xcode 27.2
   template created the new JSON format (`.xcproj`), which needs Xcode 27 or
@@ -56,9 +58,11 @@ The list feature does not know about the detail feature. Only the parent connect
   types for a small app.
 - The chart endpoint has no next page, so the list loads 50 albums at once.
   Search has real pagination through `index`, so paging lives in the search.
-- Loading state is one `Status` enum (`idle`, `loading`, `loaded`, `failed`) instead of
-  several booleans, so the screen cannot be in two states at once.
-- The list loads the chart once. Going back from the detail screen does not reload it.
+- Loading state is one `Status` enum. `albums` is a separate array, so a later
+  refresh or search paging can keep showing the old albums. The cost: the enum
+  alone does not make every invalid combination impossible.
+- The list loads the chart once. Going back from the detail screen does not
+  reload it. No pull-to-refresh for now.
 
 ## With more time
 
@@ -67,6 +71,10 @@ The list feature does not know about the detail feature. Only the parent connect
 - Separate DTOs for the API, mapped to domain models.
 - Split the app into Swift packages (for example `Models`, `DeezerClient`,
   `Features`) so the compiler enforces the boundaries.
+- Pull to refresh
+- Search met debounce
+- Paging
+- Detail screen
 
 ## AI tools
 
