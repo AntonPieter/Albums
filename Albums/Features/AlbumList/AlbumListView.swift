@@ -2,16 +2,26 @@ import ComposableArchitecture
 import SwiftUI
 
 struct AlbumListView: View {
-    let store: StoreOf<AlbumListFeature>
+    @Bindable var store: StoreOf<AlbumListFeature>
 
     var body: some View {
         content
             .navigationTitle("Albums")
+            .searchable(text: $store.query, prompt: "Search albums")
             .task { await store.send(.task).finish() }
     }
 
     @ViewBuilder
     private var content: some View {
+        if store.trimmedQuery.isEmpty {
+            chartContent
+        } else {
+            searchContent
+        }
+    }
+
+    @ViewBuilder
+    private var chartContent: some View {
         switch store.status {
         case .idle, .loading:
             ProgressView("Loading albums")
@@ -30,15 +40,42 @@ struct AlbumListView: View {
             if store.albums.isEmpty {
                 ContentUnavailableView("No albums", systemImage: "music.note.list")
             } else {
-                List(store.albums) { album in
-                    Button {
-                        store.send(.albumTapped(album))
-                    } label: {
-                        AlbumRow(album: album)
-                    }
-                    .buttonStyle(.plain)
-                }
+                albumList(store.albums)
             }
+        }
+    }
+    
+    @ViewBuilder
+    private var searchContent: some View {
+        switch store.searchStatus {
+        case .idle, .loading:
+            ProgressView("Searching")
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+
+        case .failed(let message):
+            ContentUnavailableView(
+                "Search failed",
+                systemImage: "exclamationmark.triangle",
+                description: Text(message)
+            )
+
+        case .loaded:
+            if store.results.isEmpty {
+                ContentUnavailableView.search(text: store.query)
+            } else {
+                albumList(store.results)
+            }
+        }
+    }
+    
+    private func albumList(_ albums: [Album]) -> some View {
+        List(albums) { album in
+            Button {
+                store.send(.albumTapped(album))
+            } label: {
+                AlbumRow(album: album)
+            }
+            .buttonStyle(.plain)
         }
     }
 }
@@ -111,6 +148,59 @@ private struct AlbumRow: View {
                 AlbumListFeature()
             } withDependencies: {
                 $0.deezerClient.charts = { throw DeezerError.invalidResponse }
+            }
+        )
+    }
+}
+
+#Preview("Search results") {
+    NavigationStack {
+        AlbumListView(
+            store: Store(
+                initialState: AlbumListFeature.State(
+                    query: "steven", results: Album.mocks, total: 4, searchStatus: .loaded
+                )
+            ) {
+                AlbumListFeature()
+            }
+        )
+    }
+}
+
+#Preview("Search loading") {
+    NavigationStack {
+        AlbumListView(
+            store: Store(
+                initialState: AlbumListFeature.State(query: "steven", searchStatus: .loading)
+            ) {
+                AlbumListFeature()
+            }
+        )
+    }
+}
+
+#Preview("Search empty") {
+    NavigationStack {
+        AlbumListView(
+            store: Store(
+                initialState: AlbumListFeature.State(query: "zzzz", searchStatus: .loaded)
+            ) {
+                AlbumListFeature()
+            }
+        )
+    }
+}
+
+#Preview("Search error") {
+    NavigationStack {
+        AlbumListView(
+            store: Store(
+                initialState: AlbumListFeature.State(
+                    query: "steven",
+                    searchStatus: .failed("The server sent an invalid response.")
+                )
+            ) {
+                AlbumListFeature()
             }
         )
     }

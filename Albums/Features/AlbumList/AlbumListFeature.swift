@@ -11,6 +11,7 @@ struct AlbumListFeature {
         var results: [Album] = []
         var total: Int?
         var searchStatus: Status = .idle
+        var trimmedQuery: String { query.trimmingCharacters(in: .whitespaces) }
         
         enum Status: Equatable {
             case idle
@@ -67,7 +68,7 @@ struct AlbumListFeature {
                 return .none
                 
             case .binding(\.query):
-                let query = state.query.trimmingCharacters(in: .whitespaces)
+                let query = state.trimmedQuery
                 guard !query.isEmpty else {
                     state.results = []
                     state.total = nil
