@@ -6,6 +6,10 @@
 	objectVersion = 110;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		794662F930A08D6A00ADE9EB /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 794662F830A08D6A00ADE9EB /* ComposableArchitecture */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		000000000000000000000120 /* Albums.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Albums.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -22,6 +26,7 @@
 		4E47BFD959D5A8722FA89BB2 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			files = (
+				794662F930A08D6A00ADE9EB /* ComposableArchitecture in Frameworks */,
 			);
 		};
 /* End PBXFrameworksBuildPhase section */
@@ -60,6 +65,9 @@
 				1B43F38549F015639D8EE977 /* Albums */,
 			);
 			name = Albums;
+			packageProductDependencies = (
+				794662F830A08D6A00ADE9EB /* ComposableArchitecture */,
+			);
 			productName = Albums;
 			productReference = 000000000000000000000120 /* Albums.app */;
 			productType = "com.apple.product-type.application";
@@ -83,6 +91,9 @@
 			);
 			mainGroup = F1BACC73102FFF14CDF826DB;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				794662F730A08D6A00ADE9EB /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
+			);
 			preferredProjectObjectVersion = 110;
 			productRefGroup = E7DD83CC32011B67BFB0D926 /* Products */;
 			projectDirPath = "";
@@ -142,10 +153,10 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
@@ -182,10 +193,10 @@
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
-				SWIFT_VERSION = 5.0;
+				SWIFT_VERSION = 6.0;
 				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
@@ -255,6 +266,7 @@
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG $(inherited)";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 6.0;
 				TVOS_DEPLOYMENT_TARGET = 27.2;
 				WATCHOS_DEPLOYMENT_TARGET = 27.2;
 				XROS_DEPLOYMENT_TARGET = 27.2;
@@ -318,6 +330,7 @@
 				PROJECT_UNIQUE_VALUE = R5S0AXTX;
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_VERSION = 6.0;
 				TVOS_DEPLOYMENT_TARGET = 27.2;
 				WATCHOS_DEPLOYMENT_TARGET = 27.2;
 				XROS_DEPLOYMENT_TARGET = 27.2;
@@ -344,6 +357,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		794662F730A08D6A00ADE9EB /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.26.2;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		794662F830A08D6A00ADE9EB /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 794662F730A08D6A00ADE9EB /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = B773F661B1443164C95274B1 /* Project object */;
 	validationLevel = 1;
