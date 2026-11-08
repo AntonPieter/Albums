@@ -18,9 +18,7 @@ struct AppView: View {
 
 #Preview {
     AppView(
-        store: Store(
-            initialState: AppFeature.State(list: AlbumListFeature.State(albums: Album.mocks))
-        ) {
+        store: Store(initialState: AppFeature.State()) {
             AppFeature()
         }
     )

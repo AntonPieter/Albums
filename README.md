@@ -56,6 +56,9 @@ The list feature does not know about the detail feature. Only the parent connect
   types for a small app.
 - The chart endpoint has no next page, so the list loads 50 albums at once.
   Search has real pagination through `index`, so paging lives in the search.
+- Loading state is one `Status` enum (`idle`, `loading`, `loaded`, `failed`) instead of
+  several booleans, so the screen cannot be in two states at once.
+- The list loads the chart once. Going back from the detail screen does not reload it.
 
 ## With more time
 
