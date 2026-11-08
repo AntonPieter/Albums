@@ -10,6 +10,7 @@ It shows popular albums from the Deezer API.
 - Open `Albums.xcodeproj` and run on an iPhone simulator.
 - No API key is needed.
 - No signing is needed for the simulator.
+- Xcode asks to trust the TCA macros on the first build. Choose Trust & Enable.
 
 ## API
 
@@ -18,6 +19,7 @@ Deezer public API (no key).
 Why: no key, large cover art, and music fits my background.
 
 Endpoints:
+
 - `GET /chart/0/albums?limit=50` (list, the chart returns at most 50 albums)
 - `GET /search/album?q=&index=` (search, 25 albums per page, `index` is the offset)
 - `GET /album/{id}` (detail with tracks, genres, label and release date)
