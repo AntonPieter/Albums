@@ -1,11 +1,3 @@
-//
-//  AlbumDetailView.swift
-//  Albums
-//
-//  Created by AP van Grootel on 08/11/2026.
-//
-
-
 import ComposableArchitecture
 import SwiftUI
 
