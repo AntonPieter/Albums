@@ -72,4 +72,110 @@ struct AlbumListFeatureTests {
             $0.status = .loaded
         }
     }
+
+    @Test
+    func searchLoadsFirstPageAfterDebounce() async {
+        let clock = TestClock()
+        let store = TestStore(initialState: AlbumListFeature.State()) {
+            AlbumListFeature()
+        } withDependencies: {
+            $0.continuousClock = clock
+            $0.deezerClient.search = { _, _ in Page(data: Album.mocks, total: 4) }
+        }
+
+        await store.send(.binding(.set(\.query, "steven"))) {
+            $0.query = "steven"
+            $0.searchStatus = .loading
+        }
+        await clock.advance(by: .milliseconds(300))
+        await store.receive(\.searchResponse.success) {
+            $0.results = Album.mocks
+            $0.total = 4
+            $0.searchStatus = .loaded
+        }
+    }
+
+    @Test
+    func typingDuringDebounceSearchesOnlyLastQuery() async {
+        let clock = TestClock()
+        let queries = LockIsolated<[String]>([])
+        let store = TestStore(initialState: AlbumListFeature.State()) {
+            AlbumListFeature()
+        } withDependencies: {
+            $0.continuousClock = clock
+            $0.deezerClient.search = { query, _ in
+                queries.withValue { $0.append(query) }
+                return Page(data: Album.mocks, total: 4)
+            }
+        }
+
+        await store.send(.binding(.set(\.query, "st"))) {
+            $0.query = "st"
+            $0.searchStatus = .loading
+        }
+        await clock.advance(by: .milliseconds(100))
+
+        await store.send(.binding(.set(\.query, "ste"))) {
+            $0.query = "ste"
+        }
+        await clock.advance(by: .milliseconds(300))
+
+        await store.receive(\.searchResponse.success) {
+            $0.results = Album.mocks
+            $0.total = 4
+            $0.searchStatus = .loaded
+        }
+
+        #expect(queries.value == ["ste"])
+    }
+
+    @Test
+    func clearingQueryDuringDebounceCancelsSearch() async {
+        let clock = TestClock()
+        let queries = LockIsolated<[String]>([])
+        let store = TestStore(initialState: AlbumListFeature.State()) {
+            AlbumListFeature()
+        } withDependencies: {
+            $0.continuousClock = clock
+            $0.deezerClient.search = { query, _ in
+                queries.withValue { $0.append(query) }
+                return Page(data: Album.mocks, total: 4)
+            }
+        }
+
+        await store.send(.binding(.set(\.query, "ste"))) {
+            $0.query = "ste"
+            $0.searchStatus = .loading
+        }
+        await clock.advance(by: .milliseconds(100))
+
+        await store.send(.binding(.set(\.query, ""))) {
+            $0.query = ""
+            $0.searchStatus = .idle
+        }
+        await clock.advance(by: .milliseconds(300))
+
+        #expect(queries.value.isEmpty)
+    }
+
+    @Test
+    func searchFailureShowsMessage() async {
+        let clock = TestClock()
+        let store = TestStore(initialState: AlbumListFeature.State()) {
+            AlbumListFeature()
+        } withDependencies: {
+            $0.continuousClock = clock
+            $0.deezerClient.search = { _, _ in throw DeezerError.invalidResponse }
+        }
+        
+        await store.send(.binding(.set(\.query, "error"))) {
+            $0.query = "error"
+            $0.searchStatus = .loading
+        }
+        await clock.advance(by: .milliseconds(300))
+        
+        await store.receive(\.searchResponse.failure) {
+            $0.searchStatus = .failed("The server sent an invalid response.")
+        }
+    }
 }
