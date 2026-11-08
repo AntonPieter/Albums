@@ -19,7 +19,22 @@ Endpoints: to be filled in.
 
 ## Feature structure
 
-To be filled in as features are built.
+```
+Albums/
+  App/                   AppFeature (parent, owns the StackState) and AppView
+  Features/AlbumList/    list feature and view
+  Features/AlbumDetail/  detail feature and view
+  Models/                Album, AlbumDetail, Page, mock data
+AlbumsTests/             tests for the features
+```
+
+State flow:
+
+1. `AlbumListFeature` sends `.delegate(.albumSelected(album))` when a row is tapped.
+2. `AppFeature` handles the delegate action and pushes `AlbumDetailFeature` onto its `StackState`.
+3. `AlbumDetailFeature` starts with the album it received.
+
+The list feature does not know about the detail feature. Only the parent connects them.
 
 ## Trade-offs
 
