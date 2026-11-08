@@ -15,7 +15,11 @@ It shows popular albums from the Deezer API.
 
 Deezer public API (no key).
 Why: no key, large cover art, and music fits my background.
-Endpoints: to be filled in.
+Endpoints:
+
+- `GET /chart/0/albums?limit=50` (list, the chart returns at most 50 albums)
+- `GET /search/album?q=&index=` (search, 25 albums per page, `index` is the offset)
+- `GET /album/{id}` (detail with tracks, genres, label and release date)
 
 ## Feature structure
 
@@ -50,6 +54,8 @@ The list feature does not know about the detail feature. Only the parent connect
   committed, so the versions are pinned.
 - `Album` and `AlbumDetail` serve as API models and domain models. Reason: fewer
   types for a small app.
+- The chart endpoint has no next page, so the list loads 50 albums at once.
+  Search has real pagination through `index`, so paging lives in the search.
 
 ## With more time
 
