@@ -37,12 +37,30 @@ AlbumsTests/             tests for the features
 ```
 
 State flow:
+State flow:
 
-1. `AlbumListFeature` sends `.delegate(.albumSelected(album))` when a row is tapped.
-2. `AppFeature` handles the delegate action and pushes `AlbumDetailFeature` onto its `StackState`.
-3. `AlbumDetailFeature` starts with the album it received.
+1. `AlbumListFeature` loads the chart through `DeezerClient`. When the search
+   field has text, it searches instead.
+2. Search waits 300 ms after the last key press (debounce). A new key press
+   cancels the pending request.
+3. When the last search result appears, the list asks for the next page
+   (`index = results.count`). It stops when all results are loaded.
+4. `AlbumListFeature` sends `.delegate(.albumSelected(album))` when a row is tapped.
+5. `AppFeature` handles the delegate action and pushes `AlbumDetailFeature`
+   onto its `StackState`.
+6. `AlbumDetailFeature` starts with the album it received. It then loads the
+   tracks, label and genres.
 
 The list feature does not know about the detail feature. Only the parent connects them.
+
+## Testing and previews
+
+- The views have previews for loading, loaded and error states. The list also
+  has previews for empty states. The previews use mock data.
+- `DeezerClient` has a `previewValue` with mock data. Its `testValue` fails
+  when a test calls an endpoint it did not set up.
+- Reducer tests use `TestStore`. The search tests use `TestClock` to test the
+  debounce. Run the tests with Cmd+U.
 
 ## Decisions and trade-offs
 
@@ -65,6 +83,12 @@ The list feature does not know about the detail feature. Only the parent connect
   alone does not make every invalid combination impossible.
 - The list loads the chart once. Going back from the detail screen does not
   reload it. No pull-to-refresh for now.
+- The detail screen shows the album from the list at once. Only the extra data (tracks, label, genres) loads and can fail.
+- Search shows a spinner and replaces the list on every new query. The cost:
+  the screen flickers while the user types.
+- Paging trusts `total` from the API. An empty page also stops the paging, so a
+  wrong `total` cannot cause an endless loop.
+- Nothing is cached. Reason: small scope.
 
 ## With more time
 
@@ -73,10 +97,11 @@ The list feature does not know about the detail feature. Only the parent connect
 - Separate DTOs for the API, mapped to domain models.
 - Split the app into Swift packages (for example `Models`, `DeezerClient`,
   `Features`) so the compiler enforces the boundaries.
-- Pull to refresh
-- Search met debounce
-- Paging
-- Detail screen
+- Pull to refresh for the chart.
+- Keep the old results visible while a new search loads.
+- Cache album details.
+- UI tests and snapshot tests.
+- More accessibility work, such as testing with VoiceOver and Dynamic Type.
 
 ## AI tools
 
