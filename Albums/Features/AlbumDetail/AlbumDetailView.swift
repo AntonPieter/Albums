@@ -3,7 +3,7 @@ import SwiftUI
 
 struct AlbumDetailView: View {
     let store: StoreOf<AlbumDetailFeature>
-
+    
     var body: some View {
         ScrollView {
             VStack(spacing: 16) {
@@ -18,7 +18,7 @@ struct AlbumDetailView: View {
             await store.send(.task).finish()
         }
     }
-
+    
     private var header: some View {
         VStack(spacing: 16) {
             AsyncImage(url: store.album.coverURL) { image in
@@ -28,19 +28,19 @@ struct AlbumDetailView: View {
                     .aspectRatio(1, contentMode: .fit)
             }
             .clipShape(RoundedRectangle(cornerRadius: 12))
-
+            
             Text(store.album.title).font(.title2.bold())
             Text(store.album.artistName).foregroundStyle(.secondary)
         }
     }
-
+    
     @ViewBuilder
     private var content: some View {
         switch store.status {
         case .idle, .loading:
             ProgressView()
                 .padding(.top, 24)
-
+            
         case .failed(let message):
             ContentUnavailableView {
                 Label("Could not load album", systemImage: "exclamationmark.triangle")
@@ -49,7 +49,7 @@ struct AlbumDetailView: View {
             } actions: {
                 Button("Retry") { store.send(.retryTapped) }
             }
-
+            
         case .loaded:
             if let detail = store.detail {
                 DetailInfo(detail: detail)
@@ -60,7 +60,7 @@ struct AlbumDetailView: View {
 
 private struct DetailInfo: View {
     let detail: AlbumDetail
-
+    
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             if let releaseDate = detail.releaseDate {
@@ -72,27 +72,31 @@ private struct DetailInfo: View {
             if !detail.genres.isEmpty {
                 Text(detail.genres.joined(separator: ", "))
             }
-
+            
             Divider()
-
-            ForEach(Array(detail.tracks.enumerated()), id: \.element.id) { index, track in
-                HStack {
-                    Text("\(index + 1)")
-                        .foregroundStyle(.secondary)
-                        .frame(width: 28, alignment: .trailing)
-                    Text(track.title)
-                    Spacer()
-                    Text(Self.format(track.duration))
-                        .foregroundStyle(.secondary)
-                        .monospacedDigit()
+            if detail.tracks.isEmpty {
+                Text("No tracks available")
+                    .foregroundStyle(.secondary)
+            } else {
+                ForEach(Array(detail.tracks.enumerated()), id: \.element.id) { index, track in
+                    HStack {
+                        Text("\(index + 1)")
+                            .foregroundStyle(.secondary)
+                            .frame(width: 28, alignment: .trailing)
+                        Text(track.title)
+                        Spacer()
+                        Text(Self.format(track.duration))
+                            .foregroundStyle(.secondary)
+                            .monospacedDigit()
+                    }
+                    .accessibilityElement(children: .combine)
                 }
-                .accessibilityElement(children: .combine)
             }
         }
         .font(.subheadline)
         .frame(maxWidth: .infinity, alignment: .leading)
     }
-
+    
     private static func format(_ seconds: Int) -> String {
         Duration.seconds(seconds).formatted(.time(pattern: .minuteSecond))
     }
@@ -134,6 +138,29 @@ private struct DetailInfo: View {
                 AlbumDetailFeature()
             } withDependencies: {
                 $0.deezerClient.albumDetail = { _ in throw DeezerError.invalidResponse }
+            }
+        )
+    }
+}
+
+#Preview("No tracks") {
+    NavigationStack {
+        AlbumDetailView(
+            store: Store(
+                initialState: AlbumDetailFeature.State(
+                    album: Album.mocks[0],
+                    detail: AlbumDetail(
+                        releaseDate: "2025-01-01",
+                        label: "Sample Label",
+                        trackCount: 0,
+                        duration: 0,
+                        genres: ["Rock"],
+                        tracks: []
+                    ),
+                    status: .loaded
+                )
+            ) {
+                AlbumDetailFeature()
             }
         )
     }
