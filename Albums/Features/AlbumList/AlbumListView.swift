@@ -63,19 +63,48 @@ struct AlbumListView: View {
             if store.results.isEmpty {
                 ContentUnavailableView.search(text: store.query)
             } else {
-                albumList(store.results)
+                albumList(store.results, paging: true)
             }
         }
     }
     
-    private func albumList(_ albums: [Album]) -> some View {
-        List(albums) { album in
-            Button {
-                store.send(.albumTapped(album))
-            } label: {
-                AlbumRow(album: album)
+    private func albumList(_ albums: [Album], paging: Bool = false) -> some View {
+        List {
+            ForEach(albums) { album in
+                Button {
+                    store.send(.albumTapped(album))
+                } label: {
+                    AlbumRow(album: album)
+                }
+                .buttonStyle(.plain)
+                .onAppear {
+                    if paging, album.id == albums.last?.id {
+                        store.send(.loadMore)
+                    }
+                }
             }
-            .buttonStyle(.plain)
+
+            if paging {
+                loadMoreFooter
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var loadMoreFooter: some View {
+        if store.isLoadingMore {
+            ProgressView()
+                .frame(maxWidth: .infinity)
+                .listRowSeparator(.hidden)
+        } else if store.loadMoreFailed {
+            VStack(spacing: 8) {
+                Text("Could not load more albums")
+                    .foregroundStyle(.secondary)
+                Button("Try again") { store.send(.loadMoreRetryTapped) }
+                    .buttonStyle(.borderless)
+            }
+            .frame(maxWidth: .infinity)
+            .listRowSeparator(.hidden)
         }
     }
 }
@@ -198,6 +227,42 @@ private struct AlbumRow: View {
                 initialState: AlbumListFeature.State(
                     query: "steven",
                     searchStatus: .failed("The server sent an invalid response.")
+                )
+            ) {
+                AlbumListFeature()
+            }
+        )
+    }
+}
+
+#Preview("Search loading more") {
+    NavigationStack {
+        AlbumListView(
+            store: Store(
+                initialState: AlbumListFeature.State(
+                    query: "steven",
+                    results: Album.mocks,
+                    total: 10,
+                    searchStatus: .loaded,
+                    isLoadingMore: true
+                )
+            ) {
+                AlbumListFeature()
+            }
+        )
+    }
+}
+
+#Preview("Search load more error") {
+    NavigationStack {
+        AlbumListView(
+            store: Store(
+                initialState: AlbumListFeature.State(
+                    query: "steven",
+                    results: Album.mocks,
+                    total: 10,
+                    searchStatus: .loaded,
+                    loadMoreFailed: true
                 )
             ) {
                 AlbumListFeature()
